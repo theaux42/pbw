@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import ProfileDonator from './profile-donator'
 
 export default function ProfilePage() {
   const [account, setAccount] = useState(null)
@@ -67,7 +68,9 @@ export default function ProfilePage() {
         max-w-md
       ">
         {account ? (
-          <div>
+	
+	<div>
+	<ProfileDonator account={account}/>
             <h1 className="text-2xl font-bold mb-2">Mon Profil</h1>
             <p className="mb-4">
               Connecté en tant que : 

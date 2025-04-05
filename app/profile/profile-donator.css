@@ -1,0 +1,121 @@
+/* Style général */
+.profile-donator {
+	font-family: Arial, sans-serif;
+	background-color: #f9f9f9;
+	padding: 20px;
+	max-width: 1200px;
+	margin: 0 auto;
+	border-radius: 8px;
+      }
+      
+      h1 {
+	text-align: center;
+	font-size: 2.5rem;
+	color: #333;
+	margin-bottom: 30px;
+      }
+      
+      /* Formulaire de minting */
+      .mint-form {
+	background-color: #fff;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	margin-bottom: 30px;
+      }
+      
+      .mint-form h2 {
+	font-size: 1.8rem;
+	color: #333;
+	margin-bottom: 15px;
+      }
+      
+      .mint-form input {
+	width: 100%;
+	padding: 10px;
+	margin: 10px 0;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 1rem;
+      }
+      
+      .mint-form input:focus {
+	border-color: #007BFF;
+	outline: none;
+      }
+      
+      .mint-form button {
+	background-color: #007BFF;
+	color: #fff;
+	border: none;
+	padding: 12px 20px;
+	border-radius: 4px;
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+      }
+      
+      .mint-form button:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+      }
+      
+      .mint-form button:hover:not(:disabled) {
+	background-color: #0056b3;
+      }
+      
+      /* Galerie de NFTs */
+      .gallery {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 20px;
+	justify-items: center;
+      }
+      
+      .nft-card {
+	background-color: #fff;
+	padding: 15px;
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	text-align: center;
+	transition: transform 0.3s ease;
+	width: 100%;
+      }
+      
+      .nft-card:hover {
+	transform: translateY(-5px);
+      }
+      
+      .nft-card img {
+	width: 100%;
+	height: auto;
+	border-radius: 4px;
+      }
+      
+      .nft-card p {
+	margin-top: 10px;
+	font-size: 1rem;
+	color: #333;
+	font-weight: bold;
+      }
+      
+      @media (max-width: 768px) {
+	.gallery {
+	  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	}
+      }
+      
+      @media (max-width: 480px) {
+	.mint-form input,
+	.mint-form button {
+	  font-size: 1rem;
+	}
+      
+	h1 {
+	  font-size: 2rem;
+	}
+      
+	.mint-form h2 {
+	  font-size: 1.5rem;
+	}
+      }
