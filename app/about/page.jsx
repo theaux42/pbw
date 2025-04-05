@@ -54,7 +54,7 @@ function AboutPage() {
         </p>
         <p style={{ fontSize: '17px', lineHeight: '1.6', color: '#c0c0c0', marginTop: '100px' }}>
           Developed during the Paris Blockchain Week as part of the XRP Humanity & Solidarity track by Elina
-          Jankovskaja (Master Cyber), Ramzy Bouziane, Joseph Sommet, Teo Babou, and Lucas Maret.
+          Jankovskaja , Ramzy Bouziane, Joseph Sommet, Teo Babou, and Lucas Maret.
         </p>
       </div>
     </div>
