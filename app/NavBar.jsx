@@ -13,27 +13,28 @@ export default function NavBar() {
     }
   }, [])
 
-  // Le label de droite selon connexion
   const rightLabel = account ? 'Profil' : 'Se connecter'
-  // Le lien pointe toujours vers "/profile"
-  // (la page gère le fait d’afficher le QR ou les infos)
 
   return (
-    <nav className="flex items-center justify-between bg-zinc-200 shadow px-4 py-2">
-      {/* À gauche : Accueil */}
-      <Link href="/" className="text-lg font-bold">
-        Accueil
+    <nav className="
+      flex items-center justify-between 
+      bg-indigo-800/90 backdrop-blur 
+      px-6 py-3 shadow
+    ">
+      {/* Logo / Accueil */}
+      <Link href="/" className="text-xl font-bold hover:opacity-90">
+        XRPact
       </Link>
 
-      {/* À droite : Associations, À propos, Profil/Se connecter */}
-      <div className="space-x-6">
-        <Link href="/associations" className="hover:underline">
+      {/* Liens à droite */}
+      <div className="space-x-6 text-sm font-semibold">
+        <Link href="/associations" className="hover:text-teal-300">
           Associations
         </Link>
-        <Link href="/about" className="hover:underline">
-          A propos
+        <Link href="/about" className="hover:text-teal-300">
+          À propos
         </Link>
-        <Link href="/profile" className="hover:underline">
+        <Link href="/profile" className="hover:text-teal-300">
           {rightLabel}
         </Link>
       </div>
