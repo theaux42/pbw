@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function AssociationsPage() {
   const [orgs, setOrgs] = useState([])
@@ -51,7 +52,7 @@ export default function AssociationsPage() {
                   className="w-16 h-16 object-cover rounded-full mr-4"
                 />
               )}
-              <div>
+              <div className="flex-1">
                 <h2 className="text-xl font-bold mb-1">{org.name}</h2>
                 <p className="text-sm text-gray-600 mb-1">
                   {org.description || 'Aucune description.'}
@@ -59,6 +60,14 @@ export default function AssociationsPage() {
                 <p className="text-sm text-teal-700 font-semibold">
                   Wallet: {org.wallet_address}
                 </p>
+
+                {/* Lien vers la page association-full/[uuid] */}
+                <Link
+                  href={`/association-full/${org.id}`}
+                  className="inline-block mt-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                >
+                  Voir plus
+                </Link>
               </div>
             </div>
           ))}
