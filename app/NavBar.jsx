@@ -13,30 +13,46 @@ export default function NavBar() {
     }
   }, [])
 
-  const rightLabel = account ? 'Profil' : 'Se connecter'
-
   return (
-    <nav className="
-      flex items-center justify-between 
-      bg-indigo-800/90 backdrop-blur 
-      px-6 py-3 shadow
-    ">
-      {/* Logo / Accueil */}
-      <Link href="/" className="text-xl font-bold hover:opacity-90">
-        XRPact
-      </Link>
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-gray-900/70 border-b border-gray-800/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo / Accueil */}
+          <Link 
+            href="/" 
+            className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+          >
+            XRPact
+          </Link>
 
-      {/* Liens à droite */}
-      <div className="space-x-6 text-sm font-semibold">
-        <Link href="/associations" className="hover:text-teal-300">
-          Associations
-        </Link>
-        <Link href="/about" className="hover:text-teal-300">
-          À propos
-        </Link>
-        <Link href="/profile" className="hover:text-teal-300">
-          {rightLabel}
-        </Link>
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-8">
+            <Link 
+              href="/associations" 
+              className="text-gray-300 hover:text-green-400 transition-colors text-sm font-medium"
+            >
+              Associations
+            </Link>
+            <Link 
+              href="/about" 
+              className="text-gray-300 hover:text-green-400 transition-colors text-sm font-medium"
+            >
+              À propos
+            </Link>
+            
+            {/* Profile/Login Button */}
+            <Link 
+              href="/profile" 
+              className="px-4 py-2 rounded-xl text-sm font-medium 
+                bg-gradient-to-r from-green-500/20 to-emerald-500/20 
+                hover:from-green-500/30 hover:to-emerald-500/30
+                border border-green-500/30 text-green-400
+                transition-all duration-200"
+            >
+              {account ? 'Profil' : 'Se connecter'}
+            </Link>
+          </div>
+        </div>
       </div>
     </nav>
   )
