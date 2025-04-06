@@ -25,7 +25,8 @@ export default function NavBar() {
   const navItems = [
     { name: 'associations', label: 'Associations', path: '/associations' },
     { name: 'about', label: 'À propos', path: '/about' },
-    { name: 'profile', label: account ? 'Profil' : 'Se connecter', path: account ? '/profile' : '/login', isButton: true }
+    { name: 'profile', label: account ? 'Profil' : 'Se connecter', path: account ? '/profile' : '/login', isButton: true },
+    { name: 'leaderboard', label: 'Leaderboard', path: '/leaderboard', isButton: true } // Nouveau bouton ajouté
   ]
 
   return (

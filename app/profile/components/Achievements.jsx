@@ -1,13 +1,93 @@
 import { FaMedal } from 'react-icons/fa'
 import { HiOutlineGift, HiStar } from 'react-icons/hi'
 import { FaCoins } from 'react-icons/fa'
+import { useState } from 'react'
 
 export default function Achievements({ userData }) {
-  // Add this function to handle achievement claiming
-  const handleClaimAchievement = (achievementId) => {
-    console.log(`Claiming achievement: ${achievementId}`);
-    // Implement your claim logic here
+  const [isLoading, setIsLoading] = useState({});
+
+  // Implement the achievement claim function
+  const handleClaimAchievement = async (achievementId) => {
+    try {
+      console.log(`Claiming achievement: ${achievementId}`);
+      
+      // Get wallet address from localStorage first, then fall back to userData
+      let walletAddress;
+      
+      if (typeof window !== 'undefined') {
+        walletAddress = localStorage.getItem('xumm_account');
+      }
+      
+      // If not in localStorage, use from userData
+      if (!walletAddress && userData.wallet_address) {
+        walletAddress = userData.wallet_address;
+      }
+      
+      // Check if wallet address exists
+      if (!walletAddress) {
+        throw new Error('Wallet address is required to claim achievements');
+      }
+      
+      console.log(`Using wallet address: ${walletAddress}`);
+      
+      // Set loading state for this specific achievement
+      setIsLoading(prev => ({ ...prev, [achievementId]: true }));
+      
+      const response = await fetch('/api/achievements/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          achievementId,
+          userId: userData.user_id,
+          wallet_address: walletAddress 
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Extract detailed error information from the response
+        const errorMessage = data.message || data.error || 'Failed to claim achievement';
+        const errorDetails = data.details ? `\n\nDetails: ${JSON.stringify(data.details)}` : '';
+        throw new Error(`${errorMessage}${errorDetails}`);
+      }
+      
+      // Show success message
+      alert(`Achievement claimed successfully!`);
+      
+      // Refresh the page to update UI
+      window.location.reload();
+    } catch (error) {
+      console.error('Error claiming achievement:', error);
+      
+      // Provide more helpful error message based on error type
+      let userMessage = error.message;
+      
+      // Add specific guidance for common errors
+      if (error.message.includes('join.decode: string expected') || 
+          error.message.includes('NFT minting failed')) {
+        userMessage = `The NFT minting service encountered an error. This may be a temporary issue with the XRPL service. Please try again later or contact support if the problem persists.\n\nTechnical details: ${error.message}`;
+      }
+      
+      alert(userMessage);
+    } finally {
+      // Reset loading state
+      setIsLoading(prev => ({ ...prev, [achievementId]: false }));
+    }
   };
+
+  // Update the button to show loading state
+  const renderClaimButton = (achievementId) => (
+    <button 
+      onClick={() => handleClaimAchievement(achievementId)}
+      className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+      disabled={isLoading[achievementId]}
+    >
+      {isLoading[achievementId] ? 'Claiming...' : 'Claim'}
+    </button>
+  );
 
   return (
     <>
@@ -25,12 +105,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">First Donation</h4>
           <p className="text-xs text-gray-400">Make your first donation</p>
           {userData.donation_count >= 1 ? (
-            <button 
-              onClick={() => handleClaimAchievement('first_donation')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('first_donation')
           ) : (
             <span className="text-xs text-gray-500">Locked</span>
           )}
@@ -44,12 +119,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Regular Donor</h4>
           <p className="text-xs text-gray-400">Make 5 donations</p>
           {userData.donation_count >= 5 ? (
-            <button 
-              onClick={() => handleClaimAchievement('regular_donor')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('regular_donor')
           ) : (
             <span className="text-xs text-gray-500">{userData.donation_count}/5</span>
           )}
@@ -63,12 +133,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Big Supporter</h4>
           <p className="text-xs text-gray-400">Donate 100 XRP total</p>
           {userData.total_donated >= 100 ? (
-            <button 
-              onClick={() => handleClaimAchievement('big_supporter')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('big_supporter')
           ) : (
             <span className="text-xs text-gray-500">{userData.total_donated}/100</span>
           )}
@@ -82,12 +147,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">XP Master</h4>
           <p className="text-xs text-gray-400">Earn 1000 XP</p>
           {userData.xp >= 1000 ? (
-            <button 
-              onClick={() => handleClaimAchievement('xp_master')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('xp_master')
           ) : (
             <span className="text-xs text-gray-500">{userData.xp}/1000</span>
           )}
@@ -101,12 +161,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Philanthropist</h4>
           <p className="text-xs text-gray-400">Donate 500 XRP total</p>
           {userData.total_donated >= 500 ? (
-            <button 
-              onClick={() => handleClaimAchievement('philanthropist')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('philanthropist')
           ) : (
             <span className="text-xs text-gray-500">{userData.total_donated}/500</span>
           )}
@@ -120,12 +175,7 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Veteran Supporter</h4>
           <p className="text-xs text-gray-400">Make 20 donations</p>
           {userData.donation_count >= 20 ? (
-            <button 
-              onClick={() => handleClaimAchievement('veteran_supporter')}
-              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
-            >
-              Claim
-            </button>
+            renderClaimButton('veteran_supporter')
           ) : (
             <span className="text-xs text-gray-500">{userData.donation_count}/20</span>
           )}
