@@ -16,7 +16,7 @@ export default function LoginPage() {
       if (stored) {
         try {
           // Vérifier si l'utilisateur existe dans la base de données
-          const res = await fetch(`/api/get-user-data?wallet=${stored}`)
+          const res = await fetch(`/api/user/get-user-data?wallet=${stored}`)
           const userData = await res.json()
           
           console.log('User data:', userData);
@@ -56,7 +56,7 @@ export default function LoginPage() {
 
             // Vérifier si l'utilisateur existe avant de rediriger
             try {
-              const userRes = await fetch(`/api/get-user-data?wallet=${data.account}`)
+              const userRes = await fetch(`/api/user/get-user-data?wallet=${data.account}`)
               const userData = await userRes.json()
               
               console.log('User data after login:', userData);

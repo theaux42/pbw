@@ -7,7 +7,7 @@ const supabase = createClient(
 
 // Pas de "export default"
 export async function GET(request, { params }) {
-  const { uuid } = params
+  const uuid = params.uuid;
 
   try {
     const { data, error } = await supabase

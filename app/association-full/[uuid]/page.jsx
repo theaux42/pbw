@@ -70,7 +70,7 @@ export default function AssociationFullPage() {
         }
         
         // Récupérer les données de l'utilisateur
-        const res = await fetch(`/api/get-user-data?xumm_id=${walletAddress}`)
+        const res = await fetch(`/api/user/get-user-data?xumm_id=${walletAddress}`)
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`)
         }
@@ -120,31 +120,38 @@ export default function AssociationFullPage() {
     
     if (!userId) {
       try {
-        const res = await fetch(`/api/get-user-data?xumm_id=${walletAddress}`)
+        const res = await fetch(`/api/user/get-user-data?xumm_id=${walletAddress}`)
         if (!res.ok) {
           throw new Error(`Erreur HTTP ${res.status}`)
         }
         
         const data = await res.json()
-        if (data.exists && data.user && data.user.id) {
+        console.log('Données utilisateur récupérées:', data)
+        
+        if (data.error) {
+          // Une erreur s'est produite lors de la récupération des données
+          throw new Error(data.error)
+        }
+        
+        if (data.user && data.user.id) {
           userId = data.user.id
           setUserData(data.user)
         } else {
           // L'utilisateur n'existe pas dans la base de données
-          setTransactionStatus({ 
+          setTransactionStatus({  
             type: 'error', 
             message: 'Votre profil n\'est pas complet. Redirection vers la page d\'accueil...' 
           })
           setTimeout(() => {
             router.push('/on-boarding')
-          }, 2000)
+          }, 2000) // Reduced from 20000000 to a more reasonable 2 seconds
           return
         }
       } catch (err) {
         console.error('Erreur lors de la récupération des données utilisateur:', err)
         setTransactionStatus({ 
           type: 'error', 
-          message: 'Impossible de récupérer vos informations utilisateur' 
+          message: `Impossible de récupérer vos informations utilisateur: ${err.message}` 
         })
         return
       }
