@@ -92,136 +92,121 @@ export default function AssociationFullPage() {
 
   // Gère la logique de don avec l'API XUMM
   const handleDonation = async () => {
-    const donationAmount = customAmount ? parseFloat(customAmount) : selectedAmount
-
+    const donationAmount = customAmount ? parseFloat(customAmount) : selectedAmount;
+  
     if (!donationAmount || donationAmount < 1) {
-      setTransactionStatus({ type: 'error', message: 'Le montant minimum de don est de 1 XRP' })
-      return
+      setTransactionStatus({ type: 'error', message: 'Le montant minimum de don est de 1 XRP' });
+      return;
     }
-
+  
     if (!org.wallet_address) {
-      setTransactionStatus({ type: 'error', message: 'Adresse du wallet de l\'organisation non disponible' })
-      return
+      setTransactionStatus({ type: 'error', message: "Adresse du wallet de l'organisation non disponible" });
+      return;
     }
-
-    const walletAddress = localStorage.getItem('xumm_account')
+  
+    const walletAddress = localStorage.getItem('xumm_account');
     if (!walletAddress) {
       setTransactionStatus({ 
         type: 'error', 
         message: 'Vous devez être connecté pour faire un don' 
-      })
-      setTimeout(() => {
-        router.push('/login')
-      }, 2000)
-      return
+      });
+      setTimeout(() => router.push('/login'), 2000);
+      return;
     }
-
-    let userId = userData?.id
-    
+  
+    let userId = userData?.id;
+  
     if (!userId) {
       try {
-        const res = await fetch(`/api/user/get-user-data?xumm_id=${walletAddress}`)
-        if (!res.ok) {
-          throw new Error(`Erreur HTTP ${res.status}`)
-        }
+        const res = await fetch(`/api/user/get-user-data?xumm_id=${walletAddress}`);
+        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+  
+        const userDataRes = await res.json();
         
-        const data = await res.json()
-        console.log('Données utilisateur récupérées:', data)
+        if (userDataRes.error) throw new Error(userDataRes.error);
         
-        if (data.error) {
-          throw new Error(data.error)
-        }
-        
-        if (data.user && data.user.id) {
-          userId = data.user.id
-          setUserData(data.user)
+        if (userDataRes.user?.id) {
+          userId = userDataRes.user.id;
+          setUserData(userDataRes.user);
         } else {
           setTransactionStatus({  
             type: 'error', 
-            message: 'Votre profil n\'est pas complet. Redirection vers la page d\'accueil...' 
-          })
-          setTimeout(() => {
-            router.push('/on-boarding')
-          }, 2000)
-          return
+            message: "Votre profil n'est pas complet. Redirection vers la page d'accueil..." 
+          });
+          setTimeout(() => router.push('/on-boarding'), 2000);
+          return;
         }
       } catch (err) {
-        console.error('Erreur lors de la récupération des données utilisateur:', err)
+        console.error('Erreur récupération données utilisateur:', err);
         setTransactionStatus({ 
           type: 'error', 
-          message: `Impossible de récupérer vos informations utilisateur: ${err.message}` 
-        })
-        return
+          message: `Impossible de récupérer vos infos utilisateur: ${err.message}` 
+        });
+        return;
       }
     }
-
+  
     try {
-      setTransactionLoading(true)
-      setTransactionStatus({ type: 'info', message: 'Préparation de votre transaction...' })
-
+      setTransactionLoading(true);
+      setTransactionStatus({ type: 'info', message: 'Préparation de votre transaction...' });
+  
       const response = await fetch('/api/xumm/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          orgId: uuid,
-          userId: userId,
-          platformFee: 0,
-          nftId: null,
-          destination: org.wallet_address,
+          user_id: userId,
+          org_id: uuid,
           amount: donationAmount,
-          callbackUrl: window.location.href,
         }),
-      })
-
+      });
+  
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erreur lors de la création de la transaction')
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la création de la transaction');
       }
-
-      const data = await response.json()
-
+  
+      const data = await response.json();
+  
       if (data.success) {
-        setPayloadUuid(data.payload.uuid)
-        setQrCode(data.payload.qrcode)
-        setXummLink(data.payload.link)
+        setPayloadUuid(data.payload.uuid);
+        setQrCode(data.payload.qrcode);
+        setXummLink(data.payload.link);
         setTransactionStatus({
           type: 'success',
-          message: 'Transaction prête ! Scannez le QR code avec l\'app XUMM ou cliquez sur le lien'
-        })
-
-        startPolling(data.payload.uuid)
+          message: 'Transaction prête ! Scannez le QR code avec l\'app XUMM ou cliquez sur le lien',
+        });
+  
+        // ✅ Correction ici
+        startPolling(data.donation_id, data.payload.uuid);
       } else {
-        throw new Error(data.error || 'Échec de la création de la transaction')
+        throw new Error(data.error || 'Échec de la création de la transaction');
       }
+  
     } catch (err) {
-      console.error('Erreur de transaction:', err)
+      console.error('Erreur de transaction:', err);
       setTransactionStatus({
         type: 'error',
-        message: `Erreur: ${err.message}`
-      })
+        message: `Erreur: ${err.message}`,
+      });
     } finally {
-      setTransactionLoading(false)
+      setTransactionLoading(false);
     }
-  }
-
-  const startPolling = (uuid) => {
-    if (isPolling) return
-
-    setIsPolling(true)
-
+  };
+  
+  const startPolling = (donation_id, uuid) => {
     const checkStatus = async () => {
       try {
-        const response = await fetch(`/api/xumm/transactions?uuid=${uuid}`)
-        const data = await response.json()
-
+        const response = await fetch(`/api/xumm/transactions?uuid=${uuid}&donation_id=${donation_id}`);
+        const data = await response.json();
+  
         if (data.error) {
-          setTransactionStatus({ type: 'error', message: data.error })
-          setIsPolling(false)
-          return
+          setTransactionStatus({ type: 'error', message: data.error });
+          setIsPolling(false);
+          return;
         }
-
+  
         if (data.status === 'resolved') {
           if (data.signed) {
             setTransactionStatus({
@@ -229,7 +214,7 @@ export default function AssociationFullPage() {
               message: 'Transaction signée avec succès!',
               txid: data.txid,
               transactionUrl: data.transactionUrl
-            })
+            });
             useConfetti({
               particleCount: 160,
               spread: 360,
@@ -240,34 +225,35 @@ export default function AssociationFullPage() {
             setTransactionStatus({
               type: 'error',
               message: 'Transaction rejetée'
-            })
+            });
           }
-          setIsPolling(false)
-          return
+          setIsPolling(false);
+          return;
         }
-
+  
         if (data.status === 'expired') {
           setTransactionStatus({
             type: 'error',
             message: 'La transaction a expiré'
-          })
-          setIsPolling(false)
-          return
+          });
+          setIsPolling(false);
+          return;
         }
-
-        setTimeout(checkStatus, 3000)
+  
+        setTimeout(checkStatus, 3000);
       } catch (err) {
-        console.error('Erreur lors de la vérification du statut:', err)
+        console.error('Erreur lors de la vérification du statut:', err);
         setTransactionStatus({
           type: 'error',
           message: 'Erreur lors de la vérification du statut'
-        })
-        setIsPolling(false)
+        });
+        setIsPolling(false);
       }
-    }
-
-    checkStatus()
-  }
+    };
+  
+    checkStatus();
+  };
+  
 
   if (error) {
     return <ErrorDisplay error={error} />

@@ -1,3 +1,4 @@
+// api/user/get-user-data/route.js
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
