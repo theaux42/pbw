@@ -17,7 +17,7 @@ export default function LoginPage() {
     //     localStorage.removeItem("xumm_account");
     //   }
       const logged_in = localStorage.getItem("xumm_account");
-      if (logged_in) {
+      if (logged_in && accountType) {
         let res;
 
         try {
@@ -42,7 +42,7 @@ export default function LoginPage() {
           }
         } catch (err) {
           console.error("[Auto-login error]", err);
-		//   router.push("/");
+		  router.push("/");
         }
       }
     };
@@ -65,42 +65,41 @@ export default function LoginPage() {
           const data = await res.json();
           if (data.success) {
             setAccount(data.account);
-            const storageKey = loginAsAsso
-              ? "xumm_asso_account"
-              : "xumm_account";
-            localStorage.setItem(storageKey, data.account);
+            localStorage.setItem("xumm_account", data.account);
             localStorage.setItem("account_type", loginAsAsso ? "asso" : "user");
+			localStorage.setItem(loginAsAsso ? "asso_uuid" : "user_uuid", payload.uuid);
 
             setPayload(null);
             setChecking(false);
             clearInterval(interval);
 
-            try {
-              const userRes = await fetch(
-                `/api/user/get-user-data?xumm_id=${data.account}`
-              );
-              if (!userRes.ok) {
-                throw new Error(`Error fetching user from database: ${userRes.status}`);
-              }
+			window.location.reload();
+            // try {
+            //   const userRes = await fetch(
+            //     `/api/user/get-user-data?xumm_id=${data.account}`
+            //   );
+            //   if (userRes.status != 200 && userRes.status != 404) {
+            //     throw new Error(`User data response not ok: ${userRes.status}`);
+            //   }
 
-              const userData = await userRes.json();
-              if (userData.user && userData.user.id) {
-                localStorage.setItem(
-                  loginAsAsso ? "asso_uuid" : "user_uuid",
-                  userData.user.id
-                );
-              }
-			  
-			//   router.push()
-			//   router.push(loginAsAsso ? "/page-asso" : "/profile");
-			} catch (err) {
-				console.error(
-					`Error checking ${loginAsAsso ? "asso" : "user"} after login:`,
-					err
-				);
-				//   router.push(loginAsAsso ? "/page-asso" : "/profile");
-			}
-			checkUserAndRedirect();
+            //   const userData = await userRes.json();
+            //   if (userData.user && userData.user.id) {
+            //     localStorage.setItem(
+            //       loginAsAsso ? "asso_uuid" : "user_uuid",
+            //       userData.user.id
+            //     );
+            //   }
+
+			// router.push()
+            // //   router.push(loginAsAsso ? "/page-asso" : "/profile");
+            // } catch (err) {
+            //   console.error(
+            //     `Error checking ${loginAsAsso ? "asso" : "user"} after login:`,
+            //     err
+            //   );
+            //   router.push();
+            // //   router.push(loginAsAsso ? "/page-asso" : "/profile");
+            // }
           }
         } catch (err) {
           console.error("[Polling Error]", err);

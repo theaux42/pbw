@@ -26,11 +26,11 @@ export async function GET(request) {
     const { data, error } = await supabase
       .from('organizations')
       .select('*')
-      .eq('id', organization_id)
+      .eq('wallet_address', organization_id)
       .single();
 
     // Handle query error
-    if (error) {
+    if (error == 500) {
       console.error('Supabase query error:', error);
       return NextResponse.json(
         { error: 'Error fetching organization data' },
@@ -49,7 +49,7 @@ export async function GET(request) {
     }
 
     // Return organization data
-    return NextResponse.json({ organization: data });
+    return NextResponse.json({ organization: data }, { status: 200 }, { ok: true });
 
   } catch (error) {
     console.error('Error fetching organization data:', error);

@@ -25,7 +25,12 @@ export default function ProfilePage() {
           // If no wallet is connected, redirect to login
           router.push('/login')
           return
-        }
+        }else if (localStorage.getItem('account_type') !== 'user') {
+	  // If the account type is not user, redirect to home
+	  console.error('only users can access this page')
+	  router.push('/')
+	  return
+	}
 
         // Use the get-data-user API endpoint with the xumm_id as query parameter
         const res = await fetch(`/api/user/get-user-data?xumm_id=${stored}`)
@@ -37,13 +42,13 @@ export default function ProfilePage() {
           
           // Store or update the user UUID
           if (data.user && data.user.id) {
-		  localStorage.setItem('user_uuid', data.user.id)
-		}
-	else if (res.status === 404) {
-		  router.push('/on-boarding/user')
-        } else {
-          console.error('Failed to fetch user data')
-          // If user data not found, may need to onboard
+	    localStorage.setItem('user_uuid', data.user.id)
+	  }
+	  else if (res.status === 404) {
+	    router.push('/on-boarding/user')
+          } else {
+            console.error('Failed to fetch user data')
+            // If user data not found, may need to onboard
             return
           }
         }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import useConfetti from "canvas-confetti";
+import { motion, AnimatePresence } from 'framer-motion'; // Added Framer Motion import
 import LoadingState from '../components/LoadingState'
 import ErrorDisplay from '../components/ErrorDisplay'
 import OrgBanner from '../components/OrgBanner'
@@ -32,6 +33,32 @@ export default function AssociationFullPage() {
 
   // For status polling
   const [isPolling, setIsPolling] = useState(false)
+
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.6,
+        staggerChildren: 0.2
+      }
+    },
+    exit: { opacity: 0, transition: { duration: 0.3 } }
+  };
+
+  const contentVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        type: "spring", 
+        stiffness: 100, 
+        damping: 15 
+      }
+    }
+  };
 
   const handleCopyWallet = async () => {
     try {
@@ -178,7 +205,6 @@ export default function AssociationFullPage() {
           message: 'Transaction prête ! Scannez le QR code avec l\'app XUMM ou cliquez sur le lien',
         });
   
-        // ✅ Correction ici
         startPolling(data.donation_id, data.payload.uuid);
       } else {
         throw new Error(data.error || 'Échec de la création de la transaction');
@@ -254,7 +280,6 @@ export default function AssociationFullPage() {
     checkStatus();
   };
   
-
   if (error) {
     return <ErrorDisplay error={error} />
   }
@@ -264,33 +289,55 @@ export default function AssociationFullPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-gray-100 px-4 py-8 md:px-8">
-      <OrgBanner bannerUrl={org.banner_url} />
+    <AnimatePresence mode="wait">
+      <motion.main 
+        className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-gray-100 px-4 py-8 md:px-8"
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        key="main-content"
+      >
+        <OrgBanner bannerUrl={org.banner_url} />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <OrgInfo 
-          org={org} 
-          copySuccess={copySuccess} 
-          handleCopyWallet={handleCopyWallet} 
-        />
+        <motion.div 
+          className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8"
+          variants={contentVariants}
+        >
+          <motion.div 
+            variants={contentVariants}
+            className="lg:col-span-2"
+          >
+            <OrgInfo 
+              org={org} 
+              copySuccess={copySuccess} 
+              handleCopyWallet={handleCopyWallet} 
+            />
+          </motion.div>
 
-        <DonationCard
-          selectedAmount={selectedAmount}
-          setSelectedAmount={setSelectedAmount}
-          customAmount={customAmount}
-          setCustomAmount={setCustomAmount}
-          transactionLoading={transactionLoading}
-          transactionStatus={transactionStatus}
-          setTransactionStatus={setTransactionStatus}
-          qrCode={qrCode}
-          xummLink={xummLink}
-          handleDonation={handleDonation}
-          payloadUuid={payloadUuid}
-          setPayloadUuid={setPayloadUuid}
-          setQrCode={setQrCode}
-          setXummLink={setXummLink}
-        />
-      </div>
-    </main>
+          <motion.div 
+            variants={contentVariants}
+            className="lg:col-span-1"
+          >
+            <DonationCard
+              selectedAmount={selectedAmount}
+              setSelectedAmount={setSelectedAmount}
+              customAmount={customAmount}
+              setCustomAmount={setCustomAmount}
+              transactionLoading={transactionLoading}
+              transactionStatus={transactionStatus}
+              setTransactionStatus={setTransactionStatus}
+              qrCode={qrCode}
+              xummLink={xummLink}
+              handleDonation={handleDonation}
+              payloadUuid={payloadUuid}
+              setPayloadUuid={setPayloadUuid}
+              setQrCode={setQrCode}
+              setXummLink={setXummLink}
+            />
+          </motion.div>
+        </motion.div>
+      </motion.main>
+    </AnimatePresence>
   )
 }

@@ -160,7 +160,7 @@ export default function AssoOnboardingPage() {
       console.log('Association created successfully:', data)
 
       // Redirect to organization page after successful creation
-      router.push('/organization/' + data.organization.id)
+      router.push('/full_association/' + data.organization.id)
     } catch (err) {
       console.error('Error creating association:', err)
       setError(err.message || 'Erreur lors de la création de l\'association')
