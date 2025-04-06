@@ -30,7 +30,7 @@ export async function GET(request) {
       .single();
 
     // Handle query error
-    if (error) {
+    if (error == 500) {
       console.error('Supabase query error:', error);
       return NextResponse.json(
         { error: 'Error fetching user data' },

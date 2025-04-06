@@ -3,6 +3,12 @@ import { HiOutlineGift, HiStar } from 'react-icons/hi'
 import { FaCoins } from 'react-icons/fa'
 
 export default function Achievements({ userData }) {
+  // Add this function to handle achievement claiming
+  const handleClaimAchievement = (achievementId) => {
+    console.log(`Claiming achievement: ${achievementId}`);
+    // Implement your claim logic here
+  };
+
   return (
     <>
       <h3 className="text-xl font-bold mb-4 flex items-center">
@@ -19,7 +25,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">First Donation</h4>
           <p className="text-xs text-gray-400">Make your first donation</p>
           {userData.donation_count >= 1 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('first_donation')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">Locked</span>
           )}
@@ -33,7 +44,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Regular Donor</h4>
           <p className="text-xs text-gray-400">Make 5 donations</p>
           {userData.donation_count >= 5 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('regular_donor')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">{userData.donation_count}/5</span>
           )}
@@ -47,7 +63,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Big Supporter</h4>
           <p className="text-xs text-gray-400">Donate 100 XRP total</p>
           {userData.total_donated >= 100 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('big_supporter')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">{userData.total_donated}/100</span>
           )}
@@ -61,7 +82,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">XP Master</h4>
           <p className="text-xs text-gray-400">Earn 1000 XP</p>
           {userData.xp >= 1000 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('xp_master')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">{userData.xp}/1000</span>
           )}
@@ -75,7 +101,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Philanthropist</h4>
           <p className="text-xs text-gray-400">Donate 500 XRP total</p>
           {userData.total_donated >= 500 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('philanthropist')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">{userData.total_donated}/500</span>
           )}
@@ -89,7 +120,12 @@ export default function Achievements({ userData }) {
           <h4 className="font-medium">Veteran Supporter</h4>
           <p className="text-xs text-gray-400">Make 20 donations</p>
           {userData.donation_count >= 20 ? (
-            <span className="text-xs text-green-400">Unlocked</span>
+            <button 
+              onClick={() => handleClaimAchievement('veteran_supporter')}
+              className="mt-1 px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+            >
+              Claim
+            </button>
           ) : (
             <span className="text-xs text-gray-500">{userData.donation_count}/20</span>
           )}

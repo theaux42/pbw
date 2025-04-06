@@ -13,35 +13,36 @@ export default function LoginPage() {
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       const accountType = localStorage.getItem("account_type");
-      if (!accountType) {
-        localStorage.removeItem("xumm_account");
-      }
+    //   if (!accountType) {
+    //     localStorage.removeItem("xumm_account");
+    //   }
       const logged_in = localStorage.getItem("xumm_account");
-      if (logged_in && accountType) {
+      if (logged_in) {
         let res;
 
         try {
-          if (accountType === "asso" && loginAsAsso) {
+          if (accountType == "asso" && loginAsAsso) {
             res = await fetch(`/api/user/get-asso-data?xumm_id=${logged_in}`);
-			if (res.status === 404) {
+			if (res.status == 404) {
 			  router.push("/on-boarding/asso");
-			} else if (!res.ok) {
+			} else if (res.status == 200) {
+				router.push("/dashboard");
+            } else {
                 throw new Error(`Error fetching asso data ${res.status}`);
-            } else {
-              router.push("/dashboard");
             }
-          } else if (accountType === "user" && !loginAsAsso) {
+          } else if (accountType == "user" && !loginAsAsso) {
             res = await fetch(`/api/user/get-user-data?xumm_id=${logged_in}`);
-			if (res.status === 404) {
+			if (res.status == 404) {
 			  router.push("/on-boarding/user");
-            } else if (!res.ok) {
-        	  throw new Error(`Error fetching user data ${res.status}`);
-            } else {
-              router.push("/profile");
+            } else if (res.status == 200) {
+				router.push("/profile");
+			} else {
+				throw new Error(`Error fetching user data ${res.status}`);
             }
           }
         } catch (err) {
           console.error("[Auto-login error]", err);
+		//   router.push("/");
         }
       }
     };
@@ -79,7 +80,7 @@ export default function LoginPage() {
                 `/api/user/get-user-data?xumm_id=${data.account}`
               );
               if (!userRes.ok) {
-                throw new Error(`User data response not ok: ${userRes.status}`);
+                throw new Error(`Error fetching user from database: ${userRes.status}`);
               }
 
               const userData = await userRes.json();
@@ -89,15 +90,17 @@ export default function LoginPage() {
                   userData.user.id
                 );
               }
-
-              router.push(loginAsAsso ? "/page-asso" : "/profile");
-            } catch (err) {
-              console.error(
-                `Error checking ${loginAsAsso ? "asso" : "user"} after login:`,
-                err
-              );
-              router.push(loginAsAsso ? "/page-asso" : "/profile");
-            }
+			  
+			//   router.push()
+			//   router.push(loginAsAsso ? "/page-asso" : "/profile");
+			} catch (err) {
+				console.error(
+					`Error checking ${loginAsAsso ? "asso" : "user"} after login:`,
+					err
+				);
+				//   router.push(loginAsAsso ? "/page-asso" : "/profile");
+			}
+			checkUserAndRedirect();
           }
         } catch (err) {
           console.error("[Polling Error]", err);

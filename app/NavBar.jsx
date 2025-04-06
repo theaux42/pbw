@@ -8,14 +8,16 @@ export default function NavBar() {
 
   useEffect(() => {
     const stored = localStorage.getItem('xumm_account')
-    if (stored) {
+    const userExists = fetch(`/api/user/get-user-data?xumm_id=${stored}`);
+
+    if (stored && userExists.status === 200) {
       setAccount(stored)
     }
   }, [])
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-gray-900/70 border-b border-gray-800/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Accueil */}
           <Link 

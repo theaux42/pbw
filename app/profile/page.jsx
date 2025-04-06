@@ -23,27 +23,27 @@ export default function ProfilePage() {
         const stored = localStorage.getItem('xumm_account')
         if (!stored) {
           // If no wallet is connected, redirect to login
-          window.location.href = '/login'
+          router.push('/login')
           return
         }
 
         // Use the get-data-user API endpoint with the xumm_id as query parameter
         const res = await fetch(`/api/user/get-user-data?xumm_id=${stored}`)
         
-        if (res.ok) {
+        if (res.status === 200) {
           const data = await res.json()
           // The API returns { user: data } so we need to access the user property
           setUserData(data.user)
           
           // Store or update the user UUID
           if (data.user && data.user.id) {
-            localStorage.setItem('user_uuid', data.user.id)
-          }
+		  localStorage.setItem('user_uuid', data.user.id)
+		}
+	else if (res.status === 404) {
+		  router.push('/on-boarding/user')
         } else {
           console.error('Failed to fetch user data')
           // If user data not found, may need to onboard
-          if (res.status === 404) {
-            window.location.href = '/on-boarding/user'
             return
           }
         }
