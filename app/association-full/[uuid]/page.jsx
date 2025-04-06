@@ -231,35 +231,11 @@ export default function AssociationFullPage() {
               transactionUrl: data.transactionUrl
             })
             useConfetti({
-              particleCount: 140,
-              spread: 90,
+              particleCount: 160,
+              spread: 360,
               origin: { y: 0.6 },
               colors: ['#10B981', '#34D399', '#6EE7B7', '#A7F3D0']
             });
-            
-            // Save donation to database
-            try {
-              const donationAmount = customAmount ? parseFloat(customAmount) : selectedAmount;
-              
-              await fetch('/api/user/donation-logs', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  user_id: localStorage.getItem('user_uuid'),
-                  org_id: uuid,
-                  amount: donationAmount,
-                  tx_hash: data.txid,
-                  platform_fee: 0,
-                  nft_id: null
-                }),
-              });
-              
-              console.log('Donation recorded successfully');
-            } catch (err) {
-              console.error('Error recording donation:', err);
-            }
           } else {
             setTransactionStatus({
               type: 'error',

@@ -17,7 +17,6 @@ export async function POST(request) {
     // Parse request body
     const body = await request.json();
     console.log('Received donation request:', JSON.stringify(body, null, 2));
-    
     const { 
       user_id, 
       org_id, 
@@ -36,7 +35,6 @@ export async function POST(request) {
       );
     }
 
-    // Validate numeric fields
     if (isNaN(parseFloat(amount)) || (platform_fee !== undefined && isNaN(parseFloat(platform_fee)))) {
       return NextResponse.json(
         { error: 'Amount and platform_fee must be valid numbers' },
@@ -44,7 +42,6 @@ export async function POST(request) {
       );
     }
 
-    // Fetch and log available organizations for debugging
     const { data: allOrgs, error: listOrgError } = await supabase
       .from('organizations')
       .select('id, name')
@@ -59,7 +56,6 @@ export async function POST(request) {
       console.log('Checking if org_id exists:', org_id, orgIds.includes(org_id));
     }
 
-    // Verify that the organization exists
     const { data: organization, error: orgError } = await supabase
       .from('organizations')
       .select('id')
@@ -80,7 +76,6 @@ export async function POST(request) {
       );
     }
 
-    // Verify that the user exists
     const { data: userExists, error: userError } = await supabase
       .from('users')
       .select('id')
@@ -102,7 +97,6 @@ export async function POST(request) {
       );
     }
 
-    // Check if a donation with this tx_hash already exists
     const { data: existingDonation, error: txHashError } = await supabase
       .from('donations')
       .select('id')

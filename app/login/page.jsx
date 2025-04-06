@@ -49,19 +49,16 @@ export default function LoginPage() {
             setChecking(false)
             clearInterval(interval)
 
-            // Vérifier si l'utilisateur existe avant de rediriger
             try {
               const userRes = await fetch(`/api/user/get-user-data?wallet=${data.account}`)
               const userData = await userRes.json()
               
               console.log('User data after login:', userData);
               
-              // Store user UUID if it exists
               if (userData.exists && userData.user && userData.user.id) {
                 localStorage.setItem('user_uuid', userData.user.id);
               }
-              
-              // Rediriger selon l'existence de l'utilisateur
+
               if (userData.exists) {
                 router.push('/profile')
               } else {
