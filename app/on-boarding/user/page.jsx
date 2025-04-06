@@ -17,7 +17,6 @@ export default function OnboardingPage() {
   useEffect(() => {
     const wallet = localStorage.getItem('xumm_account')
     if (!wallet) {
-      // Redirect to login if no wallet is found
       router.push('/login')
     } else {
       setWalletAddress(wallet)
@@ -74,12 +73,12 @@ export default function OnboardingPage() {
       const formData = new FormData()
       formData.append('username', username)
       formData.append('profilePic', selectedImage)
-      formData.append('walletAddress', walletAddress)
+      formData.append('xumm_id', walletAddress)
 
       console.log('Submitting form with wallet:', walletAddress)
 
       // Submit data to API
-      const response = await fetch('/api/create-user', {
+      const response = await fetch('/api/user/create-user', {
         method: 'POST',
         body: formData
       })

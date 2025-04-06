@@ -1,4 +1,4 @@
-// api/user/get-user-data/route.js
+// api/organisations/get-orga-data/route.js
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,14 +9,14 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request) {
   try {
-    // Get xumm_id from URL search params
+    // Get organization_id from URL search params
     const { searchParams } = new URL(request.url);
-    const xumm_id = searchParams.get('xumm_id');
+    const organization_id = searchParams.get('organization_id');
 
     // Validate input
-    if (!xumm_id) {
+    if (!organization_id) {
       return NextResponse.json(
-        { error: 'Missing required parameter: xumm_id' },
+        { error: 'Missing required parameter: organization_id' },
         { status: 400 },
 	{ ok: false }
       );
@@ -24,35 +24,35 @@ export async function GET(request) {
 
     // Query the database using Supabase
     const { data, error } = await supabase
-      .from('users')
+      .from('organizations')
       .select('*')
-      .eq('xumm_id', xumm_id)
+      .eq('id', organization_id)
       .single();
 
     // Handle query error
     if (error) {
       console.error('Supabase query error:', error);
       return NextResponse.json(
-        { error: 'Error fetching user data' },
+        { error: 'Error fetching organization data' },
         { status: 500 },
 	{ ok: false }
       );
     }
 
-    // Check if user exists
+    // Check if organization exists
     if (!data) {
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'Organization not found' },
         { status: 404 },
 	{ ok: true }
       );
     }
 
-    // Return user data
-    return NextResponse.json({ user: data }, { status: 200 }, { ok: true });
+    // Return organization data
+    return NextResponse.json({ organization: data });
 
   } catch (error) {
-    console.error('Error fetching user data:', error);
+    console.error('Error fetching organization data:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

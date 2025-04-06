@@ -43,7 +43,7 @@ export default function ProfilePage() {
           console.error('Failed to fetch user data')
           // If user data not found, may need to onboard
           if (res.status === 404) {
-            window.location.href = '/on-boarding'
+            window.location.href = '/on-boarding/user'
             return
           }
         }

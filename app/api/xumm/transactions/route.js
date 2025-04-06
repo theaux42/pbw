@@ -30,7 +30,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
     }
 
-    // Récupérer le wallet de l’organisation
     const { data: org, error: orgError } = await supabase
       .from('organizations')
       .select('wallet_address')
@@ -79,7 +78,6 @@ export async function POST(request) {
       )
     }
 
-    // Insérer la donation en DB
     const { data: donation, error: insertError } = await supabase
       .from('donations')
       .insert({
@@ -100,9 +98,6 @@ export async function POST(request) {
       )
     }
 
-    console.log('Donation created:', donation)
-    console.log('Payload created:', payload)
-
     return NextResponse.json({
       success: true,
       donation_id: donation.id,
@@ -122,12 +117,12 @@ export async function POST(request) {
   }
 }
 
-// GET → Vérifie le statut et met à jour la donation
+// GET → Vérifie le statut et met à jour la donation et l'utilisateur
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const uuid = searchParams.get('uuid') // payload uuid
-    const donation_id = searchParams.get('donation_id') // ID de la donation en DB
+    const uuid = searchParams.get('uuid')
+    const donation_id = searchParams.get('donation_id')
 
     if (!uuid || !donation_id) {
       return NextResponse.json(
@@ -148,11 +143,8 @@ export async function GET(request) {
     }
 
     if (!payload || !payload.meta) {
-      console.error('Invalid payload received:', payload)
       return NextResponse.json({ error: 'Payload not found or invalid' }, { status: 404 })
     }
-
-    console.log('Payload status:', payload)
 
     if (payload.meta.expired) {
       await supabase
@@ -169,13 +161,39 @@ export async function GET(request) {
       if (signed) {
         const txHash = payload.response?.txid || null
 
-        await supabase
+        const { data: donation } = await supabase
           .from('donations')
           .update({
             tx_hash: txHash,
             status: 'completed'
           })
           .eq('id', donation_id)
+          .select('user_id, amount')
+          .single()
+
+        // Mise à jour automatique des données utilisateur 🎯
+        if (donation) {
+          const { user_id, amount } = donation
+
+          // Récupérer les données actuelles de l'utilisateur
+          const { data: user } = await supabase
+            .from('users')
+            .select('donation_count, total_donated, xp')
+            .eq('id', user_id)
+            .single()
+
+          if (user) {
+            await supabase
+              .from('users')
+              .update({
+                donation_count: (user.donation_count || 0) + 1,
+                total_donated: (user.total_donated || 0) + amount,
+                xp: (user.xp || 0) + Math.floor(amount * 10), // 1 XRP = 10 XP (exemple)
+                last_donation: new Date().toISOString()
+              })
+              .eq('id', user_id)
+          }
+        }
 
         return NextResponse.json({
           status: 'resolved',

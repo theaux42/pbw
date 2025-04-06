@@ -8,9 +8,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request) {
   try {
-    // Parse request body
-    const body = await request.json();
-    const { xumm_id, username, pic_url } = body;
+    // Parse FormData instead of JSON
+    const formData = await request.formData();
+    console.log('Request FormData received');
+    
+    // Get values from FormData
+    const xumm_id = formData.get('xumm_id');
+    const username = formData.get('username');
+    let pic_url = formData.get('pic_url');
+    const profilePic = formData.get('profilePic'); // Get the file from form data
 
     // Validate required inputs
     if (!xumm_id) {
@@ -32,6 +38,34 @@ export async function POST(request) {
         { error: 'User with this wallet address already exists' },
         { status: 409 }
       );
+    }
+
+    // Handle profile picture upload if a file is provided
+    if (profilePic && profilePic.size > 0) {
+      const fileExt = profilePic.name.split('.').pop();
+      const fileName = `${xumm_id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile_pics/${fileName}`;
+      
+      // Upload the file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from('user-uploads')
+        .upload(filePath, profilePic, {
+          contentType: profilePic.type,
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Error uploading profile picture:', uploadError);
+      } else {
+        // Get the public URL for the uploaded file
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from('user-uploads')
+          .getPublicUrl(filePath);
+        
+        pic_url = publicUrl;
+      }
     }
 
     // Prepare user data with default values
