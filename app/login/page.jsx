@@ -9,19 +9,16 @@ export default function LoginPage() {
   const [payload, setPayload] = useState(null)
   const [checking, setChecking] = useState(false)
 
-  // Si l'utilisateur est déjà connecté, on vérifie et redirige
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       const stored = localStorage.getItem('xumm_account')
       if (stored) {
         try {
-          // Vérifier si l'utilisateur existe dans la base de données
           const res = await fetch(`/api/user/get-user-data?wallet=${stored}`)
           const userData = await res.json()
           
           console.log('User data:', userData);
           
-          // Rediriger selon l'existence de l'utilisateur
           if (userData.exists) {
             router.push('/profile')
           } else {
@@ -29,7 +26,6 @@ export default function LoginPage() {
           }
         } catch (err) {
           console.error('Error checking user data:', err)
-          // En cas d'erreur, rediriger vers profile par défaut
           router.push('/profile')
         }
       }
@@ -38,7 +34,6 @@ export default function LoginPage() {
     checkUserAndRedirect()
   }, [router])
 
-  // Polling pour vérifier la signature
   useEffect(() => {
     let interval
     if (payload && !account) {
@@ -60,6 +55,11 @@ export default function LoginPage() {
               const userData = await userRes.json()
               
               console.log('User data after login:', userData);
+              
+              // Store user UUID if it exists
+              if (userData.exists && userData.user && userData.user.id) {
+                localStorage.setItem('user_uuid', userData.user.id);
+              }
               
               // Rediriger selon l'existence de l'utilisateur
               if (userData.exists) {

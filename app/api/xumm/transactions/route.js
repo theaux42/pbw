@@ -100,6 +100,8 @@ export async function GET(request) {
       });
     }
     
+    
+
     // Transaction is still pending
     return NextResponse.json({ status: 'pending' });
 

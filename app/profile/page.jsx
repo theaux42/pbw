@@ -34,6 +34,11 @@ export default function ProfilePage() {
           const data = await res.json()
           // The API returns { user: data } so we need to access the user property
           setUserData(data.user)
+          
+          // Store or update the user UUID
+          if (data.user && data.user.id) {
+            localStorage.setItem('user_uuid', data.user.id)
+          }
         } else {
           console.error('Failed to fetch user data')
           // If user data not found, may need to onboard
@@ -54,6 +59,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem('xumm_account')
+    localStorage.removeItem('user_uuid') // Also remove user UUID on logout
     window.location.href = '/login'
   }
 
