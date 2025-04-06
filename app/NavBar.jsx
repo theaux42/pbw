@@ -22,7 +22,7 @@ export default function NavBar() {
             href="/" 
             className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
           >
-            XRPact
+            FundXR
           </Link>
 
           {/* Navigation Links */}
@@ -42,7 +42,7 @@ export default function NavBar() {
             
             {/* Profile/Login Button */}
             <Link 
-              href="/profile" 
+              href= {account ? '/profile' : '/login'} 
               className="px-4 py-2 rounded-xl text-sm font-medium 
                 bg-gradient-to-r from-green-500/20 to-emerald-500/20 
                 hover:from-green-500/30 hover:to-emerald-500/30

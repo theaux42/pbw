@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import useConfetti from "canvas-confetti";
 
-
 export default function AssociationFullPage() {
   const router = useRouter()
   const params = useParams()
@@ -12,6 +11,7 @@ export default function AssociationFullPage() {
 
   const [org, setOrg] = useState(null)
   const [error, setError] = useState(null)
+  const [userData, setUserData] = useState(null)
 
   // Pour le formulaire de don
   const [selectedAmount, setSelectedAmount] = useState(10)
@@ -57,6 +57,36 @@ export default function AssociationFullPage() {
     }
   }, [uuid])
 
+  // Récupérer les informations de l'utilisateur connecté
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        // Récupérer l'adresse du wallet stockée localement
+        const walletAddress = localStorage.getItem('xumm_account')
+        
+        if (!walletAddress) {
+          console.log('Aucun utilisateur connecté')
+          return
+        }
+        
+        // Récupérer les données de l'utilisateur
+        const res = await fetch(`/api/get-user-data?xumm_id=${walletAddress}`)
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`)
+        }
+        
+        const data = await res.json()
+        if (data.exists && data.user) {
+          setUserData(data.user)
+        }
+      } catch (err) {
+        console.error('Erreur lors de la récupération des données utilisateur:', err)
+      }
+    }
+    
+    fetchUserData()
+  }, [])
+
   // Gère la logique de don avec l'API XUMM
   const handleDonation = async () => {
     const donationAmount = customAmount ? parseFloat(customAmount) : selectedAmount
@@ -71,17 +101,70 @@ export default function AssociationFullPage() {
       return
     }
 
+    // Vérifier si l'utilisateur est connecté
+    const walletAddress = localStorage.getItem('xumm_account')
+    if (!walletAddress) {
+      setTransactionStatus({ 
+        type: 'error', 
+        message: 'Vous devez être connecté pour faire un don' 
+      })
+      // Rediriger vers la page de connexion après un délai
+      setTimeout(() => {
+        router.push('/login')
+      }, 2000)
+      return
+    }
+
+    // Si nous n'avons pas encore les données utilisateur, les récupérer maintenant
+    let userId = userData?.id
+    
+    if (!userId) {
+      try {
+        const res = await fetch(`/api/get-user-data?xumm_id=${walletAddress}`)
+        if (!res.ok) {
+          throw new Error(`Erreur HTTP ${res.status}`)
+        }
+        
+        const data = await res.json()
+        if (data.exists && data.user && data.user.id) {
+          userId = data.user.id
+          setUserData(data.user)
+        } else {
+          // L'utilisateur n'existe pas dans la base de données
+          setTransactionStatus({ 
+            type: 'error', 
+            message: 'Votre profil n\'est pas complet. Redirection vers la page d\'accueil...' 
+          })
+          setTimeout(() => {
+            router.push('/on-boarding')
+          }, 2000)
+          return
+        }
+      } catch (err) {
+        console.error('Erreur lors de la récupération des données utilisateur:', err)
+        setTransactionStatus({ 
+          type: 'error', 
+          message: 'Impossible de récupérer vos informations utilisateur' 
+        })
+        return
+      }
+    }
+
     try {
       setTransactionLoading(true)
       setTransactionStatus({ type: 'info', message: 'Préparation de votre transaction...' })
 
-      // Appel à l'API XUMM
+      // Appel à l'API XUMM avec l'ID utilisateur correct
       const response = await fetch('/api/xumm/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          orgId: uuid,
+          userId: userId, // Utiliser l'ID de l'utilisateur connecté
+          platformFee: 0,
+          nftId: null,
           destination: org.wallet_address,
           amount: donationAmount,
           callbackUrl: window.location.href, // Retour à la page actuelle
@@ -89,7 +172,8 @@ export default function AssociationFullPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la création de la transaction')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erreur lors de la création de la transaction')
       }
 
       const data = await response.json()

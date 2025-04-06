@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation' // pour la redirection
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -9,12 +9,33 @@ export default function LoginPage() {
   const [payload, setPayload] = useState(null)
   const [checking, setChecking] = useState(false)
 
-  // Si l'utilisateur est déjà connecté, on redirige vers la home
+  // Si l'utilisateur est déjà connecté, on vérifie et redirige
   useEffect(() => {
-    const stored = localStorage.getItem('xumm_account')
-    if (stored) {
-      router.push('/') // redirige vers la page d'accueil
+    const checkUserAndRedirect = async () => {
+      const stored = localStorage.getItem('xumm_account')
+      if (stored) {
+        try {
+          // Vérifier si l'utilisateur existe dans la base de données
+          const res = await fetch(`/api/get-user-data?wallet=${stored}`)
+          const userData = await res.json()
+          
+          console.log('User data:', userData);
+          
+          // Rediriger selon l'existence de l'utilisateur
+          if (userData.exists) {
+            router.push('/profile')
+          } else {
+            router.push('/on-boarding')
+          }
+        } catch (err) {
+          console.error('Error checking user data:', err)
+          // En cas d'erreur, rediriger vers profile par défaut
+          router.push('/profile')
+        }
+      }
     }
+    
+    checkUserAndRedirect()
   }, [router])
 
   // Polling pour vérifier la signature
@@ -33,8 +54,23 @@ export default function LoginPage() {
             setChecking(false)
             clearInterval(interval)
 
-            // Une fois loggué, on redirige
-            router.push('/')
+            // Vérifier si l'utilisateur existe avant de rediriger
+            try {
+              const userRes = await fetch(`/api/get-user-data?wallet=${data.account}`)
+              const userData = await userRes.json()
+              
+              console.log('User data after login:', userData);
+              
+              // Rediriger selon l'existence de l'utilisateur
+              if (userData.exists) {
+                router.push('/profile')
+              } else {
+                router.push('/on-boarding')
+              }
+            } catch (err) {
+              console.error('Error checking user after login:', err)
+              router.push('/on-boarding') // Par défaut, aller à l'onboarding
+            }
           }
         } catch (err) {
           console.error('[Polling Error]', err)

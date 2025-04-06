@@ -2,7 +2,7 @@ import './globals.css'
 import NavBar from './NavBar'
 
 export const metadata = {
-  title: 'XRPact',
+  title: 'FundXR',
   description: 'Plateforme de dons en XRP pour les associations',
 }
 
